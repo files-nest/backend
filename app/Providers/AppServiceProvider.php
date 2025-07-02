@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,5 +22,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         EncryptCookies::except('token');
+
+        // Preserve the URL scheme (http/https) from the request
+        if (request()->secure()) {
+            URL::forceScheme('https');
+        }
     }
 }
