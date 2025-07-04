@@ -23,7 +23,6 @@ class AppServiceProvider extends ServiceProvider
     {
         EncryptCookies::except('token');
 
-        // Preserve the URL scheme (http/https) from the request
         if (request()->secure()) {
             URL::forceScheme('https');
         }

@@ -70,7 +70,7 @@ class LoginController extends Controller
                     1,
                     '/',
                     null,
-                    $request->secure(), // Use the current request's protocol
+                    $request->secure(),
                     false,
                     false,
                     'Lax'
