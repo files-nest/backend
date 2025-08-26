@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
 
         if (request()->secure()) {
             URL::forceScheme('https');
+            URL::useOrigin(config('app.url'));
         }
     }
 }

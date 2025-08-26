@@ -8,7 +8,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --ignore-platform-reqs
 
 COPY . .
-RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
+RUN composer dump-autoload --optimize --classmap-authoritative --no-dev --no-scripts
 
 # Stage 2: Build frontend assets (Optional - if you have JS/CSS build steps)
 FROM node:lts AS frontend_builder
@@ -16,7 +16,8 @@ WORKDIR /app
 COPY --from=vendor /app /app
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-RUN pnpm install
+ENV CI=true
+RUN pnpm install --frozen-lockfile
 COPY vite.config.js ./
 COPY resources/ resources/
 RUN pnpm run build
@@ -51,13 +52,19 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
         opcache \
         redis
 
+COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Copy built vendor dependencies
 COPY --from=vendor /app/vendor /app/vendor
 COPY . /app
 COPY --from=frontend_builder /app/public/build /app/public/build/
 
-COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Clear package discovery cache first, then generate clean production cache
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
 # Set permissions for storage and bootstrap/cache (adjust user/group if needed)
 RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache \
