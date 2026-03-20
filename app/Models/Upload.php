@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\UploadFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Upload extends Model
 {
-    /** @use HasFactory<\Database\Factories\UploadFactory> */
+    /** @use HasFactory<UploadFactory> */
     use HasFactory;
 
     protected $fillable = [
